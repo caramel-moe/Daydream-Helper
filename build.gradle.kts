@@ -12,11 +12,9 @@ allprojects {
     description = "Wrapper for plugins that cannot use Daydream dependencies"
 }
 
-val targetJavaVersion = 8
 java {
-    val javaVersion: JavaVersion = JavaVersion.toVersion(targetJavaVersion)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 dependencies {
@@ -27,7 +25,6 @@ dependencies {
 tasks {
     withType<JavaCompile> {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(targetJavaVersion)
     }
 }
 
