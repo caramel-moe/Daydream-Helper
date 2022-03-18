@@ -18,22 +18,35 @@ java {
 }
 
 dependencies {
-    /* Bukkit API */
+    /* Daydream API */
     compileOnly("moe.caramel", "daydream-api", property("ver_bukkit") as String)
 }
 
+/* Tasks */
 tasks {
     withType<JavaCompile> {
         options.encoding = Charsets.UTF_8.name()
     }
+
+    withType<Javadoc> {
+        options.encoding = Charsets.UTF_8.name()
+    }
+
+    withType<ProcessResources> {
+        filteringCharset = Charsets.UTF_8.name()
+    }
 }
 
 /* Publish */
+val isSnapshot = project.version.toString().endsWith("-SNAPSHOT")
 configure<PublishingExtension> {
     repositories.maven {
         name = "caramel"
-        url = uri("https://repo.caramel.moe/repository/maven-public/")
-        credentials(PasswordCredentials::class)
+        url = uri("https://repo.caramel.moe/repository/maven-" + (if (isSnapshot) "snapshots" else "releases") + "/")
+        credentials {
+            username = System.getenv("DEPLOY_ID")
+            password = System.getenv("DEPLOY_PW")
+        }
     }
 
     publications.create<MavenPublication>("maven") {
