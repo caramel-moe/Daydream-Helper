@@ -2,6 +2,7 @@ package moe.caramel.daydream.helper;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Player class wrapper
@@ -19,5 +20,16 @@ public final class PlayerUtil {
      */
     public static int getProtocolVersion(@NotNull Player player) {
         return player.getProtocolVersion();
+    }
+
+    /**
+     * Returns player's client brand name. If the client didn't send this information, the brand name will be null.<br>
+     * For the Notchian client this name defaults to <code>vanilla</code>. Some modified clients report other names such as <code>forge</code>.<br>
+     *
+     * @return client brand name
+     */
+    @Nullable
+    public static String getClientBrandName(@NotNull Player player) {
+        return player.getClientBrandName();
     }
 }
