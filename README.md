@@ -15,27 +15,27 @@
 Maven
 ```xml
 <repository>
-  <id>caramel-repo</id>
-  <url>https://repo.caramel.moe/repository/maven-public/</url>
+    <id>caramel-repo</id>
+    <url>https://repo.caramel.moe/repository/maven-public/</url>
 </repository>
 
 <dependency>
-<groupId>moe.caramel</groupId>
-<artifactId>daydream-helper</artifactId>
-<version>2.0.0-SNAPSHOT</version>
-<scope>provided</scope>
+    <groupId>moe.caramel</groupId>
+    <artifactId>daydream-helper</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+    <scope>provided</scope>
 </dependency>
 ```
 
 Gradle KTS
 ```kotlin
 repositories {
-  // caramel.moe Repository
-  maven("https://repo.caramel.moe/repository/maven-public/")
+    // caramel.moe Repository
+    maven("https://repo.caramel.moe/repository/maven-public/")
 }
 
 dependencies {
-  // Daydream Helper
-  compileOnly("moe.caramel", "daydream-helper", "2.0.0-SNAPSHOT")
+    // Daydream Helper
+    compileOnly("moe.caramel", "daydream-helper", "2.0.0-SNAPSHOT")
 }
 ```
