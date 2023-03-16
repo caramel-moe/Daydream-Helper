@@ -47,6 +47,10 @@ configurations.all { // OMG
 /* Tasks */
 tasks {
     assemble { dependsOn(reobfJar) }
+    reobfJar { outputJar.set(layout.buildDirectory.file("libs/${project.name}-${project.version}.jar")) }
+    withType<PublishToMavenRepository> {
+        dependsOn(assemble)
+    }
 
     compileJava {
         options.encoding = Charsets.UTF_8.name()
@@ -73,7 +77,10 @@ configure<PublishingExtension> {
     }
 
     publications.create<MavenPublication>("maven") {
-        artifactId = project.name.toLowerCase(Locale.ENGLISH)
+        artifactId = project.name.lowercase(Locale.ENGLISH)
         from(components["java"])
+        artifact("build/libs/${project.name}-${project.version}.jar") {
+            classifier = null
+        }
     }
 }
