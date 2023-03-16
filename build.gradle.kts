@@ -78,9 +78,14 @@ configure<PublishingExtension> {
 
     publications.create<MavenPublication>("maven") {
         artifactId = project.name.lowercase(Locale.ENGLISH)
-        from(components["java"])
         artifact("build/libs/${project.name}-${project.version}.jar") {
             classifier = null
+        }
+        artifact("build/libs/${project.name}-${project.version}-javadoc.jar") {
+            classifier = "javadoc"
+        }
+        artifact("build/libs/${project.name}-${project.version}-sources.jar") {
+            classifier = "sources"
         }
     }
 }

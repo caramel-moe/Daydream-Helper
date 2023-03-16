@@ -19,27 +19,27 @@ public final class CorePlayerUtil {
     /**
      * 플레이어를 새로고침 합니다.
      *
-     * @param target 대상 플레이어
-     * @param players 새로고침을 수행할 플레이어 목록
+     * @param player 대상 플레이어
+     * @param targets 새로고침을 수행할 플레이어 목록
      * @param action 플레이어별 추적 해제 이후 실행할 작업
      */
-    public static void refreshPlayer(@NotNull Player target, @NotNull Collection<? extends Player> players, @NotNull Consumer<Player> action) {
-        final ServerPlayer sTarget = ((CraftPlayer) target).getHandle();
-        final ChunkMap tracker = sTarget.getLevel().getChunkSource().chunkMap;
-        for (final Player player : players) {
-            final ChunkMap.TrackedEntity entry = tracker.entityMap.get(player.getEntityId());
+    public static void refreshPlayer(@NotNull Player player, @NotNull Collection<? extends Player> targets, @NotNull Consumer<Player> action) {
+        final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
+        final ChunkMap tracker = sPlayer.getLevel().getChunkSource().chunkMap;
+        for (final Player target : targets) {
+            final ChunkMap.TrackedEntity entry = tracker.entityMap.get(target.getEntityId());
 
             // 언트래킹
             if (entry != null) {
-                entry.removePlayer(sTarget);
+                entry.removePlayer(sPlayer);
             }
 
             // 개발자의 작업 수행
             action.accept(player);
 
             // 리트래킹
-            if (entry != null && !entry.seenBy.contains(sTarget.connection)) {
-                entry.updatePlayer(sTarget);
+            if (entry != null && !entry.seenBy.contains(sPlayer.connection)) {
+                entry.updatePlayer(sPlayer);
             }
         }
     }
