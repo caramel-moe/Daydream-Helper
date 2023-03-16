@@ -1,14 +1,12 @@
-name: Publish Daydream-Helper
+name: Build and Publish
 
 on:
-  release:
-    types: [ created ]
+  push:
+    branches: [ master ]
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
       - uses: actions/checkout@v2
@@ -16,12 +14,12 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'zulu'
+          cache: 'gradle'
 
       - name : Build with Gradle
         run: |
-          chmod -R +x ./gradlew
           ./gradlew build --no-daemon
 
       - name: Publish package

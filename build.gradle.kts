@@ -1,41 +1,65 @@
 /* Imports */
 import java.util.Locale
 
+/* Plugins */
 plugins {
     id("java")
     id("maven-publish")
+    id("io.papermc.paperweight.userdev").version("1.5.3")
 }
 
+/* Project Info */
 allprojects {
     group = "moe.caramel"
-    version = property("projectVersion") as String
+    version = property("version") as String
     description = "Wrapper for plugins that cannot use Daydream dependencies"
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 
     withSourcesJar()
     withJavadocJar()
 }
 
+/* Dependencies */
+repositories {
+    mavenCentral()
+    maven(url = "https://repo.caramel.moe/repository/maven-public/") // caramel-repo
+    maven(url = "https://papermc.io/repo/repository/maven-public/") // papermc-repo
+}
+
 dependencies {
     /* Daydream API */
     compileOnly("moe.caramel", "daydream-api", property("ver_bukkit") as String)
+
+    /* Paper Server */
+    paperweight.paperDevBundle("1.19.4-R0.1-SNAPSHOT") {
+        exclude(module = "paper-mojangapi")
+        exclude(module = "paper-api")
+    }
+}
+
+configurations.all { // OMG
+    exclude("io.papermc.paper", "paper-api")
 }
 
 /* Tasks */
 tasks {
-    withType<JavaCompile> {
-        options.encoding = Charsets.UTF_8.name()
+    assemble { dependsOn(reobfJar) }
+    reobfJar { outputJar.set(layout.buildDirectory.file("libs/${project.name}-${project.version}.jar")) }
+    withType<PublishToMavenRepository> {
+        dependsOn(assemble)
     }
 
-    withType<Javadoc> {
+    compileJava {
+        options.encoding = Charsets.UTF_8.name()
+        options.release.set(17)
+    }
+    javadoc {
         options.encoding = Charsets.UTF_8.name()
     }
-
-    withType<ProcessResources> {
+    processResources {
         filteringCharset = Charsets.UTF_8.name()
     }
 }
@@ -53,7 +77,10 @@ configure<PublishingExtension> {
     }
 
     publications.create<MavenPublication>("maven") {
-        artifactId = project.name.toLowerCase(Locale.ENGLISH)
+        artifactId = project.name.lowercase(Locale.ENGLISH)
         from(components["java"])
+        artifact("build/libs/${project.name}-${project.version}.jar") {
+            classifier = null
+        }
     }
 }
