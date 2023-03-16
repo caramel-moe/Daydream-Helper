@@ -11,17 +11,16 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'zulu'
 
       - name : Build with Gradle
         run: |
-          chmod -R +x ./gradlew
           ./gradlew build --no-daemon
 
       - name: Publish package

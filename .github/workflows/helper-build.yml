@@ -14,10 +14,10 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'zulu'
+          cache: 'gradle'
 
       - name : Build with Gradle
         run: |
-          chmod -R +x ./gradlew
           ./gradlew build --no-daemon
