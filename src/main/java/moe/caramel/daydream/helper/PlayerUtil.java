@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Player class wrapper
  */
+@SuppressWarnings("unused")
 public final class PlayerUtil {
 
     private PlayerUtil() { throw new UnsupportedOperationException(); }
