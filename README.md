@@ -7,6 +7,7 @@
 [![caramel.moe](https://img.shields.io/badge/made%20by.-caramel.moe-red)](https://caramel.moe)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/caramel-moe/Daydream-Helper/helper-build-and-publish.yml)](https://img.shields.io/github/actions/workflow/status/caramel-moe/Daydream-Helper/helper-build-and-publish.yml)
 [![Discord](https://img.shields.io/discord/534586842079821824.svg?label=use%20server&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/f9qGtYF)
+</div>
 
 ---
 
