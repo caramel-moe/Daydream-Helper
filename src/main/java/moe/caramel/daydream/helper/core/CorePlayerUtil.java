@@ -35,7 +35,7 @@ public final class CorePlayerUtil {
             }
 
             // 개발자의 작업 수행
-            action.accept(player);
+            action.accept(target);
 
             // 리트래킹
             if (entry != null && !entry.seenBy.contains(sPlayer.connection)) {
