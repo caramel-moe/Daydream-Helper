@@ -1,10 +1,12 @@
 package moe.caramel.daydream.helper.core;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.function.Consumer;
 
@@ -19,9 +21,9 @@ public final class CorePlayerUtil {
     /**
      * 플레이어를 새로고침 합니다.
      *
-     * @param player 대상 플레이어
-     * @param targets 새로고침을 수행할 플레이어 목록
-     * @param action 플레이어별 추적 해제 이후 실행할 작업
+     * @param player 플레이어
+     * @param targets 새로고침을 수행할 대상 플레이어 목록
+     * @param action 대상 플레이어별 추적 해제 이후 실행할 작업
      */
     public static void refreshPlayer(@NotNull Player player, @NotNull Collection<? extends Player> targets, @NotNull Consumer<Player> action) {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
@@ -42,5 +44,16 @@ public final class CorePlayerUtil {
                 entry.updatePlayer(sPlayer);
             }
         }
+    }
+
+    /**
+     * 플레이어의 리스트 이름을 업데이트 없이 변경합니다.
+     *
+     * @param player 대상 플레이어
+     * @param name 리스트 이름
+     */
+    public static void playerListNameNonUpdate(@NotNull Player player, @Nullable Component name) {
+        final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
+        sPlayer.listName = (name == null) ? null : io.papermc.paper.adventure.PaperAdventure.asVanilla(name);
     }
 }
