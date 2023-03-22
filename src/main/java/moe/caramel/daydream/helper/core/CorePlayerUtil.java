@@ -2,13 +2,20 @@ package moe.caramel.daydream.helper.core;
 
 import io.papermc.paper.adventure.PaperAdventure;
 import net.kyori.adventure.text.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBundlePacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -18,6 +25,8 @@ import java.util.function.Consumer;
 public final class CorePlayerUtil {
 
     private CorePlayerUtil() { throw new UnsupportedOperationException(); }
+
+    // ================================
 
     /**
      * 플레이어를 새로고침 합니다.
@@ -48,6 +57,61 @@ public final class CorePlayerUtil {
     }
 
     /**
+     * 플레이어를 새로고침 합니다.
+     *
+     * @param player 플레이어
+     * @param targets 새로고침을 수행할 대상 플레이어 목록
+     * @param action 대상 플레이어별 추적 해제 이후 실행할 작업
+     */
+    @ApiStatus.Experimental
+    @SuppressWarnings("unchecked")
+    public static void daydream$refreshPlayer(@NotNull Player player, @NotNull Collection<? extends Player> targets, @NotNull RefreshLooper action) {
+        final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
+        final ChunkMap tracker = sPlayer.getLevel().getChunkSource().chunkMap;
+        for (final Player target : targets) {
+            final int id = target.getEntityId();
+            final ChunkMap.TrackedEntity entry = tracker.entityMap.get(id);
+            final boolean canSee = (entry != null && entry.seenBy.contains(sPlayer.connection));
+            final List<Packet<ClientGamePacketListener>> list = new ArrayList<>();
+
+            // 언트래킹
+            if (canSee) {
+                list.add(new ClientboundRemoveEntitiesPacket(id));
+            }
+
+            // 개발자의 작업 수행
+            action.loop(target, canSee, packet -> list.add((Packet<ClientGamePacketListener>) packet.getPacket()));
+
+            // 리트래킹
+            if (canSee) {
+                entry.serverEntity.sendPairingData(list::add, sPlayer);
+            }
+
+            if (list.size() != 0) {
+                sPlayer.connection.send(new ClientboundBundlePacket(list));
+            }
+        }
+    }
+
+    /**
+     * 새로고침 작업을 수행할 때 사용되는 함수형 인터페이스
+     */
+    @FunctionalInterface
+    public interface RefreshLooper {
+
+        /**
+         * 대상 플레이어별 추적 해제 이후 실행할 작업
+         *
+         * @param target 대상 플레이어
+         * @param canSee 호출 플레이어가 대상 플레이어를 볼 수 있는지의 여부
+         * @param packet 번들 패킷에 추가할 패킷이 있는 경우 사용
+         */
+        void loop(final @NotNull Player target, final boolean canSee, final @NotNull Consumer<moe.caramel.daydream.network.Packet> packet);
+    }
+
+    // ================================
+
+    /**
      * 플레이어의 리스트 이름을 정직하게 가져옵니다.
      *
      * @param player 대상 플레이어
@@ -69,4 +133,6 @@ public final class CorePlayerUtil {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
         sPlayer.listName = (name == null) ? null : PaperAdventure.asVanilla(name);
     }
+
+    // ================================
 }
