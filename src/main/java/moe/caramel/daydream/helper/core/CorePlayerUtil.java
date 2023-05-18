@@ -150,6 +150,7 @@ public final class CorePlayerUtil {
      *
      * @param player 대상 플레이어
      * @param maxPlayers 최대 플레이어 수 (매직밸류로 가짜 패킷을 구분)
+     * @throws IllegalAccessException 리플렉션 도중 던져질 수 있음
      */
     public static void sendLoginPacket(@NotNull Player player, final int maxPlayers) throws IllegalAccessException {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
@@ -160,8 +161,11 @@ public final class CorePlayerUtil {
         // Get Synchronized Registries
         RegistryAccess.Frozen synchronizedRegistries = null;
         for (final Field field : PlayerList.class.getDeclaredFields()) {
-            if (field.getDeclaringClass() == RegistryAccess.Frozen.class) {
+            if (field.getType() == RegistryAccess.Frozen.class) {
+                field.setAccessible(true);
                 synchronizedRegistries = (RegistryAccess.Frozen) field.get(server.getPlayerList());
+                field.setAccessible(false);
+                break;
             }
         }
 
