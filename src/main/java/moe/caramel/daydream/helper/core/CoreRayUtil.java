@@ -17,6 +17,7 @@ import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.function.Predicate;
 
 /**
@@ -41,7 +42,7 @@ public final class CoreRayUtil {
      * @param filter 엔티티 필터
      * @return 충돌 결과
      */
-    @NotNull
+    @Nullable
     public static RayTraceResult getHitResult(
         @NotNull World world, @NotNull Location position,
         @NotNull Vector velocity, @NotNull BoundingBox bb, @NotNull Predicate<Entity> filter
