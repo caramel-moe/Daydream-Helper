@@ -7,7 +7,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_19_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R3.util.CraftLocation;
 import org.bukkit.craftbukkit.v1_19_R3.util.CraftRayTraceResult;
@@ -35,7 +34,6 @@ public final class CoreRayUtil {
     /**
      * 발사체의 충돌 결과를 가져옵니다.
      *
-     * @param world 대상 월드
      * @param position 충돌 확인 위치
      * @param velocity 발사체의 속도
      * @param bb 발사체의 경계 상자
@@ -44,10 +42,10 @@ public final class CoreRayUtil {
      */
     @Nullable
     public static RayTraceResult getHitResult(
-        @NotNull World world, @NotNull Location position,
-        @NotNull Vector velocity, @NotNull BoundingBox bb, @NotNull Predicate<Entity> filter
+        @NotNull Location position, @NotNull Vector velocity,
+        @NotNull BoundingBox bb, @NotNull Predicate<Entity> filter
     ) {
-        final Level nmsLevel = ((CraftWorld) world).getHandle();
+        final Level nmsLevel = ((CraftWorld) position.getWorld()).getHandle();
         final Vec3 nmsPos = CraftLocation.toVec3D(position);
         final Vec3 nmsVel = CraftVector.toNMS(velocity);
         final AABB nmsBb = new AABB(bb.getMinX(), bb.getMinY(), bb.getMinZ(), bb.getMaxX(), bb.getMaxY(), bb.getMaxZ());
@@ -75,6 +73,6 @@ public final class CoreRayUtil {
             result = entityHitRes;
         }
 
-        return CraftRayTraceResult.fromNMS(world, result);
+        return CraftRayTraceResult.fromNMS(nmsLevel.getWorld(), result);
     }
 }
