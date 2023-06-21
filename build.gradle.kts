@@ -31,7 +31,7 @@ repositories {
 
 dependencies {
     /* Daydream API */
-    compileOnly("moe.caramel", "daydream-api", property("ver_bukkit") as String)
+    compileOnly("moe.caramel", "daydream-api", property("version") as String)
 
     /* Paper Server */
     paperweight.paperDevBundle("1.19.4-R0.1-SNAPSHOT") {
