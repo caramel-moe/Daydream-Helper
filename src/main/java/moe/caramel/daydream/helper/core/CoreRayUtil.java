@@ -45,6 +45,24 @@ public final class CoreRayUtil {
         @NotNull Location position, @NotNull Vector velocity,
         @NotNull BoundingBox bb, @NotNull Predicate<Entity> filter
     ) {
+        return CoreRayUtil.getHitResult(position, velocity, bb, filter, 1.0D);
+    }
+
+    /**
+     * 발사체의 충돌 결과를 가져옵니다.
+     *
+     * @param position 충돌 확인 위치
+     * @param velocity 발사체의 속도
+     * @param bb 발사체의 경계 상자
+     * @param filter 엔티티 필터
+     * @return 충돌 결과
+     */
+    @Nullable
+    public static RayTraceResult getHitResult(
+        @NotNull Location position, @NotNull Vector velocity,
+        @NotNull BoundingBox bb, @NotNull Predicate<Entity> filter,
+        final double inflate
+    ) {
         final Level nmsLevel = ((CraftWorld) position.getWorld()).getHandle();
         final Vec3 nmsPos = CraftLocation.toVec3D(position);
         final Vec3 nmsVel = CraftVector.toNMS(velocity);
@@ -66,7 +84,7 @@ public final class CoreRayUtil {
         // Search Entity
         final HitResult entityHitRes = ProjectileUtil.getEntityHitResult(
             nmsLevel, null, nmsPos, end,
-            nmsBb.expandTowards(nmsVel).inflate(1.0D),
+            nmsBb.expandTowards(nmsVel).inflate(inflate),
             entity -> filter.test(entity.getBukkitEntity())
         );
         if (entityHitRes != null) {
