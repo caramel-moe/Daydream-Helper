@@ -15,7 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.biome.BiomeManager;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +45,7 @@ public final class CorePlayerUtil {
      */
     public static void refreshPlayer(@NotNull Player player, @NotNull Collection<? extends Player> targets, @NotNull Consumer<Player> action) {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
-        final ChunkMap tracker = sPlayer.getLevel().getChunkSource().chunkMap;
+        final ChunkMap tracker = sPlayer.serverLevel().getChunkSource().chunkMap;
         for (final Player target : targets) {
             final ChunkMap.TrackedEntity entry = tracker.entityMap.get(target.getEntityId());
 
@@ -75,7 +75,7 @@ public final class CorePlayerUtil {
     @SuppressWarnings("unchecked")
     public static void daydream$refreshPlayer(@NotNull Player player, @NotNull Collection<? extends Player> targets, @NotNull RefreshLooper action) {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
-        final ChunkMap tracker = sPlayer.getLevel().getChunkSource().chunkMap;
+        final ChunkMap tracker = sPlayer.serverLevel().getChunkSource().chunkMap;
         for (final Player target : targets) {
             final int id = target.getEntityId();
             final ChunkMap.TrackedEntity entry = tracker.entityMap.get(id);
@@ -92,10 +92,10 @@ public final class CorePlayerUtil {
 
             // 리트래킹
             if (canSee) {
-                entry.serverEntity.sendPairingData(list::add, sPlayer);
+                entry.serverEntity.sendPairingData(sPlayer, list::add);
             }
 
-            if (list.size() != 0) {
+            if (!list.isEmpty()) {
                 sPlayer.connection.send(new ClientboundBundlePacket(list));
             }
         }
@@ -154,7 +154,7 @@ public final class CorePlayerUtil {
      */
     public static void sendLoginPacket(@NotNull Player player, final int maxPlayers) throws IllegalAccessException {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
-        final ServerLevel sLevel = sPlayer.getLevel();
+        final ServerLevel sLevel = sPlayer.serverLevel();
         final GameRules rules = sLevel.getGameRules();
         final MinecraftServer server = sLevel.getServer();
 
@@ -179,12 +179,13 @@ public final class CorePlayerUtil {
             sPlayer.gameMode.getGameModeForPlayer(), sPlayer.gameMode.getPreviousGameModeForPlayer(),
             server.levelKeys(), synchronizedRegistries, sLevel.dimensionTypeId(), sLevel.dimension(),
             BiomeManager.obfuscateSeed(sLevel.getSeed()), maxPlayers,
-            sLevel.getChunkSource().chunkMap.playerChunkManager.getTargetSendDistance(),
-            sLevel.getChunkSource().chunkMap.playerChunkManager.getTargetTickViewDistance(),
+            sLevel.getWorld().getSendViewDistance(),
+            sLevel.getWorld().getSimulationDistance(),
             rules.getBoolean(GameRules.RULE_REDUCEDDEBUGINFO),
             !rules.getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN),
             sLevel.isDebug(), sLevel.isFlat(),
-            sPlayer.getLastDeathLocation()
+            sPlayer.getLastDeathLocation(),
+            sPlayer.getPortalCooldown()
         ));
     }
 

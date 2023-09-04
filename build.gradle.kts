@@ -31,10 +31,11 @@ repositories {
 
 dependencies {
     /* Daydream API */
-    compileOnly("moe.caramel", "daydream-api", property("version") as String)
+    val version = property("version") as String
+    compileOnly("moe.caramel", "daydream-api", version)
 
     /* Paper Server */
-    paperweight.paperDevBundle("1.19.4-R0.1-SNAPSHOT") {
+    paperweight.paperDevBundle(version) {
         exclude(module = "paper-mojangapi")
         exclude(module = "paper-api")
     }
