@@ -14,8 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.biome.BiomeManager;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -176,16 +175,13 @@ public final class CorePlayerUtil {
         // Send Packet
         sPlayer.connection.send(new ClientboundLoginPacket(
             sPlayer.getId(), sLevel.getLevelData().isHardcore(),
-            sPlayer.gameMode.getGameModeForPlayer(), sPlayer.gameMode.getPreviousGameModeForPlayer(),
-            server.levelKeys(), synchronizedRegistries, sLevel.dimensionTypeId(), sLevel.dimension(),
-            BiomeManager.obfuscateSeed(sLevel.getSeed()), maxPlayers,
+            server.levelKeys(), maxPlayers,
             sLevel.getWorld().getSendViewDistance(),
             sLevel.getWorld().getSimulationDistance(),
             rules.getBoolean(GameRules.RULE_REDUCEDDEBUGINFO),
             !rules.getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN),
-            sLevel.isDebug(), sLevel.isFlat(),
-            sPlayer.getLastDeathLocation(),
-            sPlayer.getPortalCooldown()
+            rules.getBoolean(GameRules.RULE_LIMITED_CRAFTING),
+            sPlayer.createCommonSpawnInfo(sLevel)
         ));
     }
 
