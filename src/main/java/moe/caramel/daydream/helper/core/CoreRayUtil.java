@@ -6,11 +6,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R2.util.CraftLocation;
-import org.bukkit.craftbukkit.v1_20_R2.util.CraftRayTraceResult;
-import org.bukkit.craftbukkit.v1_20_R2.util.CraftVector;
+import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R3.util.CraftLocation;
+import org.bukkit.craftbukkit.v1_20_R3.util.CraftRayTraceResult;
+import org.bukkit.craftbukkit.v1_20_R3.util.CraftVector;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
@@ -74,7 +75,7 @@ public final class CoreRayUtil {
         // Search Block
         final HitResult blockHitRes = nmsLevel.clip(new ClipContext(
             nmsPos, end, ClipContext.Block.COLLIDER,
-            ClipContext.Fluid.NONE, null
+            ClipContext.Fluid.NONE, CollisionContext.empty()
         ));
         result = blockHitRes;
         if (blockHitRes.getType() != HitResult.Type.MISS) {
