@@ -2,24 +2,20 @@ package moe.caramel.daydream.helper.core;
 
 import io.papermc.paper.adventure.PaperAdventure;
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ChunkMap;
+import net.minecraft.server.level.ChunkMap.TrackedEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.GameRules;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,9 +40,8 @@ public final class CorePlayerUtil {
      */
     public static void refreshPlayer(@NotNull Player player, @NotNull Collection<? extends Player> targets, @NotNull Consumer<Player> action) {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
-        final ChunkMap tracker = sPlayer.serverLevel().getChunkSource().chunkMap;
         for (final Player target : targets) {
-            final ChunkMap.TrackedEntity entry = tracker.entityMap.get(target.getEntityId());
+            final TrackedEntity entry = (((CraftPlayer) target).getHandle().tracker);
 
             // 언트래킹
             if (entry != null) {
@@ -74,16 +69,15 @@ public final class CorePlayerUtil {
     @SuppressWarnings("unchecked")
     public static void daydream$refreshPlayer(@NotNull Player player, @NotNull Collection<? extends Player> targets, @NotNull RefreshLooper action) {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
-        final ChunkMap tracker = sPlayer.serverLevel().getChunkSource().chunkMap;
         for (final Player target : targets) {
-            final int id = target.getEntityId();
-            final ChunkMap.TrackedEntity entry = tracker.entityMap.get(id);
+            final ServerPlayer sTarget = ((CraftPlayer) target).getHandle();
+            final TrackedEntity entry = (sTarget.tracker);
             final boolean canSee = (entry != null && entry.seenBy.contains(sPlayer.connection));
             final List<Packet<ClientGamePacketListener>> list = new ArrayList<>();
 
             // 언트래킹
             if (canSee) {
-                list.add(new ClientboundRemoveEntitiesPacket(id));
+                list.add(new ClientboundRemoveEntitiesPacket(sTarget.getId()));
             }
 
             // 개발자의 작업 수행
@@ -149,33 +143,16 @@ public final class CorePlayerUtil {
      *
      * @param player 대상 플레이어
      * @param maxPlayers 최대 플레이어 수 (매직밸류로 가짜 패킷을 구분)
-     * @throws IllegalAccessException 리플렉션 도중 던져질 수 있음
      */
-    public static void sendLoginPacket(@NotNull Player player, final int maxPlayers) throws IllegalAccessException {
+    public static void sendLoginPacket(@NotNull Player player, final int maxPlayers) {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
         final ServerLevel sLevel = sPlayer.serverLevel();
         final GameRules rules = sLevel.getGameRules();
-        final MinecraftServer server = sLevel.getServer();
-
-        // Get Synchronized Registries
-        RegistryAccess.Frozen synchronizedRegistries = null;
-        for (final Field field : PlayerList.class.getDeclaredFields()) {
-            if (field.getType() == RegistryAccess.Frozen.class) {
-                field.setAccessible(true);
-                synchronizedRegistries = (RegistryAccess.Frozen) field.get(server.getPlayerList());
-                field.setAccessible(false);
-                break;
-            }
-        }
-
-        if (synchronizedRegistries == null) {
-            throw new NullPointerException();
-        }
 
         // Send Packet
         sPlayer.connection.send(new ClientboundLoginPacket(
             sPlayer.getId(), sLevel.getLevelData().isHardcore(),
-            server.levelKeys(), maxPlayers,
+            sLevel.getServer().levelKeys(), maxPlayers,
             sLevel.getWorld().getSendViewDistance(),
             sLevel.getWorld().getSimulationDistance(),
             rules.getBoolean(GameRules.RULE_REDUCEDDEBUGINFO),
