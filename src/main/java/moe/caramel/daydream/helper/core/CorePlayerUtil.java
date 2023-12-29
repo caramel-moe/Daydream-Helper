@@ -5,12 +5,9 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
-import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.server.level.ChunkMap.TrackedEntity;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.GameRules;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
@@ -133,33 +130,6 @@ public final class CorePlayerUtil {
     public static void playerListNameNonUpdate(@NotNull Player player, @Nullable Component name) {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
         sPlayer.listName = (name == null) ? null : PaperAdventure.asVanilla(name);
-    }
-
-    // ================================
-
-    /**
-     * 플레이어에게 로그인 패킷을 전송합니다.
-     * 패킷 유틸리티가 월드 NBT에 접근해야 하는 경우 유용합니다.
-     *
-     * @param player 대상 플레이어
-     * @param maxPlayers 최대 플레이어 수 (매직밸류로 가짜 패킷을 구분)
-     */
-    public static void sendLoginPacket(@NotNull Player player, final int maxPlayers) {
-        final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
-        final ServerLevel sLevel = sPlayer.serverLevel();
-        final GameRules rules = sLevel.getGameRules();
-
-        // Send Packet
-        sPlayer.connection.send(new ClientboundLoginPacket(
-            sPlayer.getId(), sLevel.getLevelData().isHardcore(),
-            sLevel.getServer().levelKeys(), maxPlayers,
-            sLevel.getWorld().getSendViewDistance(),
-            sLevel.getWorld().getSimulationDistance(),
-            rules.getBoolean(GameRules.RULE_REDUCEDDEBUGINFO),
-            !rules.getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN),
-            rules.getBoolean(GameRules.RULE_LIMITED_CRAFTING),
-            sPlayer.createCommonSpawnInfo(sLevel)
-        ));
     }
 
     // ================================
