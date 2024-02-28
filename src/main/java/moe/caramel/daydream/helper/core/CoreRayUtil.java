@@ -56,6 +56,7 @@ public final class CoreRayUtil {
      * @param velocity 발사체의 속도
      * @param bb 발사체의 경계 상자
      * @param filter 엔티티 필터
+     * @param inflate 경계 상자 확장 크기
      * @return 충돌 결과
      */
     @Nullable

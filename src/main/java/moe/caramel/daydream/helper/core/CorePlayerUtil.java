@@ -104,7 +104,7 @@ public final class CorePlayerUtil {
          * @param canSee 호출 플레이어가 대상 플레이어를 볼 수 있는지의 여부
          * @param packet 번들 패킷에 추가할 패킷이 있는 경우 사용
          */
-        void loop(final @NotNull Player target, final boolean canSee, final @NotNull Consumer<moe.caramel.daydream.network.Packet> packet);
+        void loop(final @NotNull Player target, final boolean canSee, final @NotNull Consumer<moe.caramel.daydream.packet.Packet> packet);
     }
 
     // ================================
