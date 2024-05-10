@@ -3,7 +3,6 @@ package moe.caramel.daydream.helper.core;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
-import io.netty.handler.codec.EncoderException;
 import net.minecraft.Util;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.RegistryAccess;
@@ -39,7 +38,7 @@ public final class CoreServerUtil {
         final Frozen frozen = new ImmutableRegistryAccess(RegistrySynchronization.networkedRegistries(registries)).freeze();
 
         return Util.getOrThrow(RegistrySynchronization.NETWORK_CODEC.encodeStart(BUILTIN_OPS, frozen), message -> {
-            return new EncoderException("Failed to encode: " + message + " " + frozen);
+            return new RuntimeException("Failed to encode: " + message + " " + frozen);
         }).getAsJsonObject();
     }
 
