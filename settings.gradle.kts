@@ -3,6 +3,6 @@ rootProject.name = "Daydream-Helper"
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven(url = "https://papermc.io/repo/repository/maven-public/") // papermc-repo
+        maven(url = "https://repo.papermc.io/repository/maven-public/") // papermc-repo
     }
 }

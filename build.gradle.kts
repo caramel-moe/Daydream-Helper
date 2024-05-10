@@ -5,7 +5,7 @@ import java.util.Locale
 plugins {
     id("java")
     id("maven-publish")
-    id("io.papermc.paperweight.userdev").version("1.5.8")
+    id("io.papermc.paperweight.userdev").version("1.5.15")
 }
 
 /* Project Info */
@@ -26,7 +26,7 @@ java {
 repositories {
     mavenCentral()
     maven(url = "https://repo.caramel.moe/repository/maven-public/") // caramel-repo
-    maven(url = "https://papermc.io/repo/repository/maven-public/") // papermc-repo
+    maven(url = "https://repo.papermc.io/repository/maven-public/") // papermc-repo
 }
 
 dependencies {
