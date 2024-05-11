@@ -11,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
 import org.jetbrains.annotations.NotNull;
+import java.util.Optional;
 
 /**
  * 아이템 유틸리티 클래스
@@ -34,14 +35,18 @@ public final class CoreItemUtil {
      * @return 직렬화된 이이템 데이터
      */
     @NotNull
-    public static JsonElement serializeToJson(@NotNull org.bukkit.inventory.ItemStack item) {
+    public static Optional<JsonElement> serializeToJson(@NotNull org.bukkit.inventory.ItemStack item) {
         final ItemStack nms = (item instanceof CraftItemStack craft) ? craft.handle : CraftItemStack.asNMSCopy(item);
+        if (nms == null || nms.isEmpty()) {
+            return Optional.empty();
+        }
+
         final CompoundTag tag = nms.save(new CompoundTag());
         tag.putInt(DATA_VERSION_TAG, DATA_VERSION);
 
-        return Util.getOrThrow(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, tag), message -> {
+        return Optional.of(Util.getOrThrow(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, tag), message -> {
             return new RuntimeException("Failed to encode: " + message);
-        });
+        }));
     }
 
     /**
