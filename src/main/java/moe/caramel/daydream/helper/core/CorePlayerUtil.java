@@ -8,7 +8,7 @@ import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.server.level.ChunkMap.TrackedEntity;
 import net.minecraft.server.level.ServerPlayer;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -70,7 +70,7 @@ public final class CorePlayerUtil {
             final ServerPlayer sTarget = ((CraftPlayer) target).getHandle();
             final TrackedEntity entry = (sTarget.tracker);
             final boolean canSee = (entry != null && entry.seenBy.contains(sPlayer.connection));
-            final List<Packet<ClientGamePacketListener>> list = new ArrayList<>();
+            final List<Packet<? super ClientGamePacketListener>> list = new ArrayList<>();
 
             // 언트래킹
             if (canSee) {

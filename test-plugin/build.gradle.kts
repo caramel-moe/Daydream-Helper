@@ -7,7 +7,7 @@ val gameVersion = rootProject.version.toString().split("-")[0]
 version = gameVersion
 
 dependencies {
-    compileOnly(rootProject)
+    implementation(rootProject)
 }
 
 tasks {
@@ -15,11 +15,8 @@ tasks {
         dependsOn(shadowJar)
     }
 
-    shadowJar {
-        rootProject.tasks.named("reobfJar").also {
-            this.dependsOn(it.get())
-            this.from(zipTree((it.get() as io.papermc.paperweight.tasks.RemapJar).outputJar))
-        }
+    jar {
+        manifest.attributes["paperweight-mappings-namespace"] = "mojang+yarn"
     }
 
     runServer {

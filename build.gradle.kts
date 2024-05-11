@@ -1,11 +1,12 @@
 /* Imports */
+import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
 import java.util.Locale
 
 /* Plugins */
 plugins {
     id("java")
     id("maven-publish")
-    id("io.papermc.paperweight.userdev").version("1.5.15")
+    id("io.papermc.paperweight.userdev").version("1.6.3")
 }
 
 /* Project Info */
@@ -16,8 +17,7 @@ allprojects {
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
     withSourcesJar()
     withJavadocJar()
 }
@@ -59,16 +59,9 @@ tasks {
             finalizedBy(rootProject.project(":test-plugin").tasks.build)
         }
     }
-
-    assemble { dependsOn(reobfJar) }
-    reobfJar { outputJar.set(layout.buildDirectory.file("libs/${project.name}-${project.version}.jar")) }
-    withType<PublishToMavenRepository> {
-        dependsOn(assemble)
-    }
-
     compileJava {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(17)
+        options.release.set(21)
     }
     javadoc {
         options.encoding = Charsets.UTF_8.name()
@@ -77,6 +70,8 @@ tasks {
         filteringCharset = Charsets.UTF_8.name()
     }
 }
+
+paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 /* Publish */
 val isSnapshot = project.version.toString().endsWith("-SNAPSHOT")
@@ -92,14 +87,6 @@ configure<PublishingExtension> {
 
     publications.create<MavenPublication>("maven") {
         artifactId = project.name.lowercase(Locale.ENGLISH)
-        artifact("build/libs/${project.name}-${project.version}.jar") {
-            classifier = null
-        }
-        artifact("build/libs/${project.name}-${project.version}-javadoc.jar") {
-            classifier = "javadoc"
-        }
-        artifact("build/libs/${project.name}-${project.version}-sources.jar") {
-            classifier = "sources"
-        }
+        from(components["java"])
     }
 }

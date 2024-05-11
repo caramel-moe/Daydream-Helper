@@ -6,10 +6,10 @@ import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
-import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 
@@ -41,10 +41,10 @@ public final class CoreItemUtil {
             return Optional.empty();
         }
 
-        final CompoundTag tag = nms.save(new CompoundTag());
+        final CompoundTag tag = (CompoundTag) nms.save(MinecraftServer.getServer().registryAccess());
         tag.putInt(DATA_VERSION_TAG, DATA_VERSION);
 
-        return Optional.of(Util.getOrThrow(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, tag), message -> {
+        return Optional.of(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, tag).getOrThrow(message -> {
             return new RuntimeException("Failed to encode: " + message);
         }));
     }
@@ -57,14 +57,14 @@ public final class CoreItemUtil {
      */
     @NotNull
     public static org.bukkit.inventory.ItemStack deserializeFromJson(@NotNull JsonElement json) {
-        final CompoundTag tag = Util.getOrThrow(CompoundTag.CODEC.decode(JsonOps.INSTANCE, json), message -> {
+        final CompoundTag tag = CompoundTag.CODEC.decode(JsonOps.INSTANCE, json).getOrThrow(message -> {
             return new RuntimeException("Failed to decode: " + message);
         }).getFirst();
 
         final int version = tag.getInt(DATA_VERSION_TAG);
         MCDataConverter.convertTag(MCTypeRegistry.ITEM_STACK, tag, version, DATA_VERSION);
 
-        return ItemStack.of(tag).asBukkitMirror();
+        return ItemStack.parse(MinecraftServer.getServer().registryAccess(), tag).orElse(ItemStack.EMPTY).asBukkitMirror();
     }
 
     // ================================

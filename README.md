@@ -12,22 +12,7 @@
 ---
 
 ### Dependency 정보
-Maven
-```xml
-<repository>
-    <id>caramel-repo</id>
-    <url>https://repo.caramel.moe/repository/maven-public/</url>
-</repository>
-
-<dependency>
-    <groupId>moe.caramel</groupId>
-    <artifactId>daydream-helper</artifactId>
-    <version>1.20.4-R0.1-SNAPSHOT</version>
-    <scope>provided</scope>
-</dependency>
-```
-
-Gradle KTS
+Gradle
 ```kotlin
 repositories {
     // caramel.moe Repository
@@ -36,6 +21,19 @@ repositories {
 
 dependencies {
     // Daydream Helper
-    compileOnly("moe.caramel", "daydream-helper", "1.20.4-R0.1-SNAPSHOT")
+    implementation("moe.caramel", "daydream-helper", "1.20.6-R0.1-SNAPSHOT")
 }
+
+// (1) Shadow를 사용하지 않는 경우
+tasks.jar {
+    manifest.attributes["paperweight-mappings-namespace"] = "mojang+yarn"
+}
+
+// (2) Shadow를 사용하는 경우
+tasks.shadowJar {
+    manifest.attributes["paperweight-mappings-namespace"] = "mojang+yarn"
+}
+
+// (3) paperweight를 사용하는 경우
+paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
 ```
