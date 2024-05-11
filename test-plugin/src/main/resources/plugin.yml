@@ -1,0 +1,7 @@
+name: Daydream-Helper-Test-Plugin
+version: ${version}
+main: moe.caramel.testplugin.TestPlugin
+description: Daydream-Helper Test Plugin
+author: caramel.moe
+api-version: ${apiversion}
+load: STARTUP

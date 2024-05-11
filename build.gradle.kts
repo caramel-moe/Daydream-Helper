@@ -23,19 +23,26 @@ java {
 }
 
 /* Dependencies */
-repositories {
-    mavenCentral()
-    maven(url = "https://repo.caramel.moe/repository/maven-public/") // caramel-repo
-    maven(url = "https://repo.papermc.io/repository/maven-public/") // papermc-repo
+val gameVersion = property("version") as String
+
+allprojects {
+    apply(plugin = "java")
+
+    repositories {
+        mavenCentral()
+        maven(url = "https://repo.caramel.moe/repository/maven-public/") // caramel-repo
+        maven(url = "https://repo.papermc.io/repository/maven-public/") // papermc-repo
+    }
+
+    dependencies {
+        /* Daydream API */
+        compileOnly("moe.caramel", "daydream-api", gameVersion)
+    }
 }
 
 dependencies {
-    /* Daydream API */
-    val version = property("version") as String
-    compileOnly("moe.caramel", "daydream-api", version)
-
     /* Paper Server */
-    paperweight.paperDevBundle(version) {
+    paperweight.paperDevBundle(gameVersion) {
         exclude(module = "paper-mojangapi")
         exclude(module = "paper-api")
     }
@@ -47,6 +54,12 @@ configurations.all { // OMG
 
 /* Tasks */
 tasks {
+    build {
+        if (rootProject.childProjects["test-plugin"] != null) {
+            finalizedBy(rootProject.project(":test-plugin").tasks.build)
+        }
+    }
+
     assemble { dependsOn(reobfJar) }
     reobfJar { outputJar.set(layout.buildDirectory.file("libs/${project.name}-${project.version}.jar")) }
     withType<PublishToMavenRepository> {
