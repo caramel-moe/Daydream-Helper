@@ -6,7 +6,7 @@ import java.util.Locale
 plugins {
     id("java")
     id("maven-publish")
-    id("io.papermc.paperweight.userdev").version("1.6.3")
+    id("io.papermc.paperweight.userdev").version("1.7.1")
 }
 
 /* Project Info */
