@@ -1,21 +1,36 @@
 package moe.caramel.daydream.helper.core;
 
+import com.mojang.datafixers.DataFixer;
 import io.papermc.paper.adventure.PaperAdventure;
+import moe.caramel.daydream.advancement.PlayerAdvancementData;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.level.ChunkMap.TrackedEntity;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.level.storage.LevelResource;
+import org.bukkit.advancement.Advancement;
+import org.bukkit.advancement.AdvancementProgress;
+import org.bukkit.craftbukkit.advancement.CraftAdvancement;
+import org.bukkit.craftbukkit.advancement.CraftAdvancementProgress;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
@@ -133,4 +148,59 @@ public final class CorePlayerUtil {
     }
 
     // ================================
+
+    private static final @Nullable Constructor<PlayerAdvancements> ADVANCEMENTS_CONSTRUCTOR;
+    static {
+        Constructor<PlayerAdvancements> constructor = null;
+        try {
+            @SuppressWarnings("all")
+            final Constructor<PlayerAdvancements> cached = PlayerAdvancements.class.getConstructor(DataFixer.class, PlayerList.class, ServerAdvancementManager.class, Path.class, ServerPlayer.class, boolean.class);
+            constructor = cached;
+        } catch (final NoSuchMethodException ignored) {
+        }
+        ADVANCEMENTS_CONSTRUCTOR = constructor;
+    }
+
+    /**
+     * 빈 플레이어 발전과제 데이터를 생성합니다.
+     *
+     * @param targetUuid 대상 플레이어의 UUID
+     * @return 플레이어 발전과제 데이터
+     */
+    @NotNull
+    public static PlayerAdvancementData createEmptyPlayerAdvancementData(@Nullable UUID targetUuid) {
+        if (CorePlayerUtil.ADVANCEMENTS_CONSTRUCTOR == null) {
+            throw new UnsupportedOperationException("지원하지 않는 시스템입니다.");
+        }
+
+        final MinecraftServer server = MinecraftServer.getServer();
+        final DataFixer dataFixer = server.getFixerUpper();
+        final PlayerList playerList = server.getPlayerList();
+        final ServerAdvancementManager advancementLoader = server.getAdvancements();
+
+        final UUID uuid = (targetUuid == null) ? UUID.randomUUID() : targetUuid;
+        final Path filePath = server.getWorldPath(LevelResource.PLAYER_ADVANCEMENTS_DIR).resolve(uuid + ".json");
+
+        try {
+            return (PlayerAdvancementData) ADVANCEMENTS_CONSTRUCTOR.newInstance(dataFixer, playerList, advancementLoader, filePath, null, false);
+        } catch (final InvocationTargetException | IllegalAccessException | InstantiationException exception) {
+            throw new RuntimeException("지원하지 않는 시스템입니다.", exception);
+        }
+    }
+
+    /**
+     * 발전과제 진행도를 가져옵니다.
+     *
+     * @param data 플레이어 발전과제 데이터
+     * @param advancement 대상 발전과제
+     * @return 발전과제 진행도
+     */
+    @NotNull
+    public static AdvancementProgress getAdvancementProgress(@NotNull PlayerAdvancementData data, @NotNull Advancement advancement) {
+        final CraftAdvancement craft = (CraftAdvancement) advancement;
+        final PlayerAdvancements playerData = (PlayerAdvancements) data;
+        final net.minecraft.advancements.AdvancementProgress progress = playerData.getOrStartProgress(craft.getHandle());
+
+        return new CraftAdvancementProgress(craft, playerData, progress);
+    }
 }
