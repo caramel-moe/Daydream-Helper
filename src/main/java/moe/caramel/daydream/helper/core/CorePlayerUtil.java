@@ -53,18 +53,16 @@ public final class CorePlayerUtil {
     public static void refreshPlayer(@NotNull Player player, @NotNull Collection<? extends Player> targets, @NotNull Consumer<Player> action) {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
         for (final Player target : targets) {
-            final TrackedEntity entry = (((CraftPlayer) target).getHandle().tracker);
+            final TrackedEntity entry = ((CraftPlayer) target).getHandle().moonrise$getTrackedEntity();
 
             // 언트래킹
-            if (entry != null) {
-                entry.removePlayer(sPlayer);
-            }
+            entry.removePlayer(sPlayer);
 
             // 개발자의 작업 수행
             action.accept(target);
 
             // 리트래킹
-            if (entry != null && !entry.seenBy.contains(sPlayer.connection)) {
+            if (!entry.seenBy.contains(sPlayer.connection)) {
                 entry.updatePlayer(sPlayer);
             }
         }
@@ -83,8 +81,8 @@ public final class CorePlayerUtil {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
         for (final Player target : targets) {
             final ServerPlayer sTarget = ((CraftPlayer) target).getHandle();
-            final TrackedEntity entry = (sTarget.tracker);
-            final boolean canSee = (entry != null && entry.seenBy.contains(sPlayer.connection));
+            final TrackedEntity entry = sTarget.moonrise$getTrackedEntity();
+            final boolean canSee = entry.seenBy.contains(sPlayer.connection);
             final List<Packet<? super ClientGamePacketListener>> list = new ArrayList<>();
 
             // 언트래킹
