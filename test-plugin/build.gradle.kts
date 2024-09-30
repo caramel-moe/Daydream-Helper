@@ -1,6 +1,6 @@
 plugins {
+    id("com.gradleup.shadow").version("8.3.0")
     id("xyz.jpenilla.run-paper").version("2.3.0")
-    id("io.github.goooler.shadow").version("8.1.7")
 }
 
 val gameVersion = rootProject.version.toString().split("-")[0]
