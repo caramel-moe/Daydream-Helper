@@ -60,11 +60,11 @@ public final class CoreServerUtil {
         json.addProperty("type", serializedLocation);
         json.add("value", values);
 
-        registries.registry(data.key()).ifPresent(registry -> registry.holders().forEach(holder -> {
+        registries.lookup(data.key()).ifPresent(registry -> registry.entrySet().forEach(holder -> {
             final JsonObject value = new JsonObject();
-            value.addProperty("name", locationToString(holder.key().location()));
-            value.addProperty("id", registry.getId(holder.value()));
-            value.add("element", data.elementCodec().encodeStart(ops, holder.value()).getOrThrow());
+            value.addProperty("name", locationToString(holder.getKey().location()));
+            value.addProperty("id", registry.getId(holder.getValue()));
+            value.add("element", data.elementCodec().encodeStart(ops, holder.getValue()).getOrThrow());
             values.add(value);
         }));
 
