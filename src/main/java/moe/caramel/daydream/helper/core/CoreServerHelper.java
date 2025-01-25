@@ -15,29 +15,23 @@ import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.RegistryLayer;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.VisibleForTesting;
 
 /**
- * 서버 유틸리티 클래스
+ * 서버 헬퍼 클래스
  */
+@ApiStatus.NonExtendable
 @SuppressWarnings("unused")
-public final class CoreServerUtil {
-
-    private CoreServerUtil() { throw new UnsupportedOperationException(); }
-
-    // ================================
+public interface CoreServerHelper {
 
     /**
      * 서버 레지스트리를 JSON으로 변환하여 가져옵니다.
      *
-     * @deprecated trash code
      * @return 변환된 JSON 레지스트리
      */
-    @NotNull
-    @Deprecated
     @VisibleForTesting
-    public static JsonObject getRegistryToJson() {
+    static JsonObject getRegistryToJson() {
         final LayeredRegistryAccess<RegistryLayer> registries = MinecraftServer.getServer().registries();
         final DynamicOps<JsonElement> ops = registries.compositeAccess().createSerializationContext(JsonOps.INSTANCE);
         final Frozen frozen = new ImmutableRegistryAccess(RegistrySynchronization.networkedRegistries(registries)).freeze();
@@ -51,9 +45,11 @@ public final class CoreServerUtil {
         return json;
     }
 
-    private static <T> JsonObject legacyRegistrySerializer(
-        final RegistryAccess registries, final DynamicOps<JsonElement> ops,
-        final String serializedLocation, final RegistryDataLoader.RegistryData<T> data
+    //<editor-fold desc="Registry Serializer" defaultstate="collapsed">
+    private static <T> JsonObject legacyRegistrySerializer(final RegistryAccess registries,
+                                                           final DynamicOps<JsonElement> ops,
+                                                           final String serializedLocation,
+                                                           final RegistryDataLoader.RegistryData<T> data
     ) {
         final JsonObject json = new JsonObject();
         final JsonArray values = new JsonArray();
@@ -75,6 +71,5 @@ public final class CoreServerUtil {
     private static String locationToString(final ResourceLocation location) {
         return (String) ResourceLocation.CODEC.encodeStart(JavaOps.INSTANCE, location).getOrThrow();
     }
-
-    // ================================
+    //</editor-fold>
 }

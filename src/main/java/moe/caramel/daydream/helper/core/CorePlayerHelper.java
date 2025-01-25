@@ -22,8 +22,7 @@ import org.bukkit.craftbukkit.advancement.CraftAdvancementProgress;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
@@ -34,15 +33,13 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
- * 엔티티를 제어하는 유틸리티 클래스
+ * 플레이어 엔티티 헬퍼 클래스
  */
+@ApiStatus.NonExtendable
 @SuppressWarnings("unused")
-public final class CorePlayerUtil {
+public interface CorePlayerHelper {
 
-    private CorePlayerUtil() { throw new UnsupportedOperationException(); }
-
-    // ================================
-
+    //<editor-fold desc="Refresh tracker" defaultstate="collapsed">
     /**
      * 플레이어를 새로고침 합니다.
      *
@@ -50,7 +47,7 @@ public final class CorePlayerUtil {
      * @param targets 새로고침을 수행할 대상 플레이어 목록
      * @param action 대상 플레이어별 추적 해제 이후 실행할 작업
      */
-    public static void refreshPlayer(@NotNull Player player, @NotNull Collection<? extends Player> targets, @NotNull Consumer<Player> action) {
+    static void refreshPlayer(final Player player, final Collection<? extends Player> targets,final Consumer<Player> action) {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
         for (final Player target : targets) {
             final TrackedEntity entry = ((CraftPlayer) target).getHandle().moonrise$getTrackedEntity();
@@ -75,9 +72,7 @@ public final class CorePlayerUtil {
      * @param targets 새로고침을 수행할 대상 플레이어 목록
      * @param action 대상 플레이어별 추적 해제 이후 실행할 작업
      */
-    @ApiStatus.Experimental
-    @SuppressWarnings("unchecked")
-    public static void daydream$refreshPlayer(@NotNull Player player, @NotNull Collection<? extends Player> targets, @NotNull RefreshLooper action) {
+    static void daydream$refreshPlayer(final Player player, final Collection<? extends Player> targets, final RefreshLooper action) {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
         for (final Player target : targets) {
             final ServerPlayer sTarget = ((CraftPlayer) target).getHandle();
@@ -91,7 +86,11 @@ public final class CorePlayerUtil {
             }
 
             // 개발자의 작업 수행
-            action.loop(target, canSee, packet -> list.add((Packet<ClientGamePacketListener>) packet.getPacket()));
+            action.loop(target, canSee, packet -> {
+                @SuppressWarnings("unchecked")
+                final Packet<ClientGamePacketListener> nmsPacket = (Packet<ClientGamePacketListener>) packet.getPacket();
+                list.add(nmsPacket);
+            });
 
             // 리트래킹
             if (canSee) {
@@ -108,7 +107,7 @@ public final class CorePlayerUtil {
      * 새로고침 작업을 수행할 때 사용되는 함수형 인터페이스
      */
     @FunctionalInterface
-    public interface RefreshLooper {
+    interface RefreshLooper {
 
         /**
          * 대상 플레이어별 추적 해제 이후 실행할 작업
@@ -117,11 +116,11 @@ public final class CorePlayerUtil {
          * @param canSee 호출 플레이어가 대상 플레이어를 볼 수 있는지의 여부
          * @param packet 번들 패킷에 추가할 패킷이 있는 경우 사용
          */
-        void loop(final @NotNull Player target, final boolean canSee, final @NotNull Consumer<moe.caramel.daydream.packet.Packet> packet);
+        void loop(Player target, boolean canSee, Consumer<moe.caramel.daydream.packet.Packet> packet);
     }
+    //</editor-fold>
 
-    // ================================
-
+    //<editor-fold desc="Update display name" defaultstate="collapsed">
     /**
      * 플레이어의 리스트 이름을 정직하게 가져옵니다.
      *
@@ -129,7 +128,7 @@ public final class CorePlayerUtil {
      * @return 플레이어 리스트 이름
      */
     @Nullable
-    public static Component playerListName(@NotNull Player player) {
+    static Component playerListName(final Player player) {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
         return sPlayer.getTabListDisplayName() == null ? null : PaperAdventure.asAdventure(sPlayer.listName);
     }
@@ -140,34 +139,36 @@ public final class CorePlayerUtil {
      * @param player 대상 플레이어
      * @param name 리스트 이름
      */
-    public static void playerListNameNonUpdate(@NotNull Player player, @Nullable Component name) {
+    static void playerListNameNonUpdate(final Player player, final @Nullable Component name) {
         final ServerPlayer sPlayer = ((CraftPlayer) player).getHandle();
         sPlayer.listName = (name == null) ? null : PaperAdventure.asVanilla(name);
     }
+    //</editor-fold>
 
-    // ================================
-
-    private static final @Nullable Constructor<PlayerAdvancements> ADVANCEMENTS_CONSTRUCTOR;
-    static {
-        Constructor<PlayerAdvancements> constructor = null;
-        try {
-            @SuppressWarnings("all")
-            final Constructor<PlayerAdvancements> cached = PlayerAdvancements.class.getConstructor(DataFixer.class, PlayerList.class, ServerAdvancementManager.class, Path.class, ServerPlayer.class, boolean.class);
-            constructor = cached;
-        } catch (final NoSuchMethodException ignored) {
-        }
-        ADVANCEMENTS_CONSTRUCTOR = constructor;
-    }
-
+    //<editor-fold desc="Advancement Data" defaultstate="collapsed">
     /**
      * 빈 플레이어 발전과제 데이터를 생성합니다.
      *
      * @param targetUuid 대상 플레이어의 UUID
      * @return 플레이어 발전과제 데이터
      */
-    @NotNull
-    public static PlayerAdvancementData createEmptyPlayerAdvancementData(@Nullable UUID targetUuid) {
-        if (CorePlayerUtil.ADVANCEMENTS_CONSTRUCTOR == null) {
+    static PlayerAdvancementData createEmptyPlayerAdvancementData(final @Nullable UUID targetUuid) {
+        //<editor-fold desc="Local holder" defaultstate="collapsed">
+        class Holder {
+            private static final @Nullable Constructor<PlayerAdvancements> ADVANCEMENTS_CONSTRUCTOR;
+            static {
+                Constructor<PlayerAdvancements> constructor = null;
+                try {
+                    @SuppressWarnings("all")
+                    final Constructor<PlayerAdvancements> cached = PlayerAdvancements.class.getConstructor(DataFixer.class, PlayerList.class, ServerAdvancementManager.class, Path.class, ServerPlayer.class, boolean.class);
+                    constructor = cached;
+                } catch (final NoSuchMethodException ignored) {
+                }
+                ADVANCEMENTS_CONSTRUCTOR = constructor;
+            }
+        }
+        //</editor-fold>
+        if (Holder.ADVANCEMENTS_CONSTRUCTOR == null) {
             throw new UnsupportedOperationException("지원하지 않는 시스템입니다.");
         }
 
@@ -180,7 +181,7 @@ public final class CorePlayerUtil {
         final Path filePath = server.getWorldPath(LevelResource.PLAYER_ADVANCEMENTS_DIR).resolve(uuid + ".json");
 
         try {
-            return (PlayerAdvancementData) ADVANCEMENTS_CONSTRUCTOR.newInstance(dataFixer, playerList, advancementLoader, filePath, null, false);
+            return (PlayerAdvancementData) Holder.ADVANCEMENTS_CONSTRUCTOR.newInstance(dataFixer, playerList, advancementLoader, filePath, null, false);
         } catch (final InvocationTargetException | IllegalAccessException | InstantiationException exception) {
             throw new RuntimeException("지원하지 않는 시스템입니다.", exception);
         }
@@ -193,12 +194,12 @@ public final class CorePlayerUtil {
      * @param advancement 대상 발전과제
      * @return 발전과제 진행도
      */
-    @NotNull
-    public static AdvancementProgress getAdvancementProgress(@NotNull PlayerAdvancementData data, @NotNull Advancement advancement) {
+    static AdvancementProgress getAdvancementProgress(final PlayerAdvancementData data, final Advancement advancement) {
         final CraftAdvancement craft = (CraftAdvancement) advancement;
         final PlayerAdvancements playerData = (PlayerAdvancements) data;
         final net.minecraft.advancements.AdvancementProgress progress = playerData.getOrStartProgress(craft.getHandle());
 
         return new CraftAdvancementProgress(craft, playerData, progress);
     }
+    //</editor-fold>
 }

@@ -10,23 +10,20 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.ApiStatus;
 import java.util.Optional;
 
 /**
- * 아이템 유틸리티 클래스
+ * 아이템 헬퍼 클래스
  */
+@ApiStatus.NonExtendable
 @SuppressWarnings("unused")
-public final class CoreItemUtil {
-
-    private CoreItemUtil() { throw new UnsupportedOperationException(); }
-
-    // ================================
+public interface CoreItemHelper {
 
     /**
      * 데이터 버전
      */
-    public static final int DATA_VERSION = SharedConstants.getCurrentVersion().getDataVersion().getVersion();
+    int DATA_VERSION = SharedConstants.getCurrentVersion().getDataVersion().getVersion();
 
     /**
      * {@link org.bukkit.inventory.ItemStack}을 {@link JsonElement}로 변환합니다.
@@ -34,8 +31,7 @@ public final class CoreItemUtil {
      * @param item 대상 아이템
      * @return 직렬화된 이이템 데이터
      */
-    @NotNull
-    public static Optional<JsonElement> serializeToJson(@NotNull org.bukkit.inventory.ItemStack item) {
+    static Optional<JsonElement> serializeToJson(final org.bukkit.inventory.ItemStack item) {
         final ItemStack nms = (item instanceof CraftItemStack craft) ? craft.handle : CraftItemStack.asNMSCopy(item);
         if (nms == null || nms.isEmpty()) {
             return Optional.empty();
@@ -44,9 +40,8 @@ public final class CoreItemUtil {
         final CompoundTag tag = (CompoundTag) nms.save(MinecraftServer.getServer().registryAccess());
         tag.putInt(DATA_VERSION_TAG, DATA_VERSION);
 
-        return Optional.of(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, tag).getOrThrow(message -> {
-            return new RuntimeException("Failed to encode: " + message);
-        }));
+        return Optional.of(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, tag)
+            .getOrThrow(message -> new RuntimeException("Failed to encode: " + message)));
     }
 
     /**
@@ -55,17 +50,15 @@ public final class CoreItemUtil {
      * @param json 직렬화된 아이템 데이터
      * @return 아이템
      */
-    @NotNull
-    public static org.bukkit.inventory.ItemStack deserializeFromJson(@NotNull JsonElement json) {
-        final CompoundTag tag = CompoundTag.CODEC.decode(JsonOps.INSTANCE, json).getOrThrow(message -> {
-            return new RuntimeException("Failed to decode: " + message);
-        }).getFirst();
+    static org.bukkit.inventory.ItemStack deserializeFromJson(final JsonElement json) {
+        final CompoundTag tag = CompoundTag.CODEC
+            .decode(JsonOps.INSTANCE, json)
+            .getOrThrow(message -> new RuntimeException("Failed to decode: " + message))
+            .getFirst();
 
         final int version = tag.getInt(DATA_VERSION_TAG);
         MCDataConverter.convertTag(MCTypeRegistry.ITEM_STACK, tag, version, DATA_VERSION);
 
         return ItemStack.parse(MinecraftServer.getServer().registryAccess(), tag).orElse(ItemStack.EMPTY).asBukkitMirror();
     }
-
-    // ================================
 }

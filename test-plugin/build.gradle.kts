@@ -1,6 +1,6 @@
 plugins {
-    id("com.gradleup.shadow").version("8.3.0")
-    id("xyz.jpenilla.run-paper").version("2.3.0")
+    id("com.gradleup.shadow").version("8.3.5")
+    id("xyz.jpenilla.run-paper").version("2.3.1")
 }
 
 val gameVersion = rootProject.version.toString().split("-")[0]
@@ -26,7 +26,7 @@ tasks {
     }
 
     processResources {
-        val apiVersion = gameVersion.split(".").take(2).joinToString(".")
+        val apiVersion = gameVersion.split("-")[0]
         val props = mapOf(
             "version" to project.version,
             "apiversion" to "\"$apiVersion\"",

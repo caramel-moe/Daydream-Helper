@@ -1,16 +1,15 @@
-package moe.caramel.daydream.helper;
+package moe.caramel.daydream.helper.bukkit;
 
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.ApiStatus;
+import org.jspecify.annotations.Nullable;
 
 /**
- * Player class wrapper
+ * Player class helper
  */
+@ApiStatus.NonExtendable
 @SuppressWarnings("unused")
-public final class PlayerUtil {
-
-    private PlayerUtil() { throw new UnsupportedOperationException(); }
+public interface BukkitPlayerHelper {
 
     /**
      * Returns the protocol version of the client.
@@ -20,7 +19,7 @@ public final class PlayerUtil {
      * @see <a href="http://wiki.vg/Protocol_version_numbers">List of protocol
      *     version numbers</a>
      */
-    public static int getProtocolVersion(@NotNull Player player) {
+    static int getProtocolVersion(final Player player) {
         return player.getProtocolVersion();
     }
 
@@ -32,7 +31,7 @@ public final class PlayerUtil {
      * @return client brand name
      */
     @Nullable
-    public static String getClientBrandName(@NotNull Player player) {
+    static String getClientBrandName(final Player player) {
         return player.getClientBrandName();
     }
 }

@@ -7,17 +7,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.util.BoundingBox;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
- * 월드 유틸리티 클래스
+ * 월드 헬퍼 클래스
  */
+@ApiStatus.NonExtendable
 @SuppressWarnings("unused")
-public final class CoreWorldUtil {
-
-    private CoreWorldUtil() { throw new UnsupportedOperationException(); }
-
-    // ================================
+public interface CoreWorldHelper {
 
     /**
      * 특정 범위 내에 블록이 있는지 확인합니다.
@@ -26,7 +23,7 @@ public final class CoreWorldUtil {
      * @param box 확인할 범위
      * @return 만약 범위 내에 블록이 있다면 {@code false}를 반환
      */
-    public static boolean noBlocksAround(@NotNull World world, @NotNull BoundingBox box) {
+    static boolean noBlocksAround(final World world, final BoundingBox box) {
         final int minX = Mth.floor(box.getMinX());
         final int minY = Mth.floor(box.getMinY());
         final int minZ = Mth.floor(box.getMinZ());
@@ -49,6 +46,4 @@ public final class CoreWorldUtil {
 
         return true;
     }
-
-    // ================================
 }
