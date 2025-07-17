@@ -2,7 +2,7 @@ name: Build and Publish
 
 on:
   push:
-    branches: [ master ]
+    branches: [ ver/1.21.4 ]
 
 jobs:
   build:
