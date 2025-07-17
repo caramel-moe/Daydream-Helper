@@ -58,8 +58,8 @@ public interface CoreRayHelper {
                                        final Predicate<Entity> filter, final double inflate
     ) {
         final Level nmsLevel = ((CraftWorld) position.getWorld()).getHandle();
-        final Vec3 nmsPos = CraftLocation.toVec3D(position);
-        final Vec3 nmsVel = CraftVector.toNMS(velocity);
+        final Vec3 nmsPos = CraftLocation.toVec3(position);
+        final Vec3 nmsVel = CraftVector.toVec3(velocity);
         final AABB nmsBb = new AABB(bb.getMinX(), bb.getMinY(), bb.getMinZ(), bb.getMaxX(), bb.getMaxY(), bb.getMaxZ());
 
         HitResult result;
@@ -85,6 +85,6 @@ public interface CoreRayHelper {
             result = entityHitRes;
         }
 
-        return CraftRayTraceResult.fromNMS(nmsLevel.getWorld(), result);
+        return CraftRayTraceResult.convertFromInternal(nmsLevel, result);
     }
 }
