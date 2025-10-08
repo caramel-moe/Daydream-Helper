@@ -6,7 +6,7 @@ import java.util.Locale
 plugins {
     id("java")
     id("maven-publish")
-    id("io.papermc.paperweight.userdev").version("2.0.0-beta.18")
+    id("io.papermc.paperweight.userdev").version("2.0.0-beta.19")
 }
 
 /* Project Info */
@@ -37,6 +37,7 @@ allprojects {
     dependencies {
         /* Daydream API */
         compileOnly("moe.caramel", "daydream-api", gameVersion)
+        implementation("net.kyori:adventure-text-serializer-ansi:4.25.0") // TODO dev-bundle bug
     }
 }
 

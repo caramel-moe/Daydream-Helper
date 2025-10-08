@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     // Daydream Helper
-    implementation("moe.caramel", "daydream-helper", "1.21.7-R0.1-SNAPSHOT")
+    implementation("moe.caramel", "daydream-helper", "1.21.10-R0.1-SNAPSHOT")
 }
 
 // (1) Shadow를 사용하지 않는 경우
